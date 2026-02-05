@@ -1,0 +1,14 @@
+.env
+README.md
+# Ignore the docker-compose.yml file
+docker-compose.yml
+# Ignore the LICENSE.md file
+LICENSE.md
+# Ignore the .gitignore file
+.gitignore
+# Ignore the .dockerignore file
+.dockerignore
+# Ignore the .vscode file
+.vscode
+# Ignore the .git file
+.git
