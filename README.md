@@ -1,3 +1,5 @@
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/yhoths)
+
 # Terraria Server (Docker)
 
 Run a Terraria dedicated server in Docker. Configuration is done via environment variables or an optional config file. World data is stored in a bind-mounted volume.
