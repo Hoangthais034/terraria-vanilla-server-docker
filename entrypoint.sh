@@ -40,6 +40,7 @@ else
   echo "MOTD: ${TERRARIA_MOTD:-A Terraria server}"
 fi
 
+# Create Worlds directory (Terraria will also create it, but we ensure it exists)
 mkdir -p "$WORLDS_DIR"
 # Ensure proper permissions for world directory
 chmod 755 "$WORLDS_DIR"
@@ -47,7 +48,11 @@ chown -R root:root "$WORLDS_DIR" 2>/dev/null || true
 
 # Log where worlds are stored
 echo "[INFO] World files will be saved to: $WORLDS_DIR"
-echo "[INFO] This maps to host path: ${TERRARIA_DATA_PATH:-<not set>}"
+if [[ -n "${TERRARIA_DATA_PATH:-}" ]]; then
+  echo "[INFO] This maps to host path: ${TERRARIA_DATA_PATH}/Worlds"
+else
+  echo "[INFO] Host path mapping: <not set>"
+fi
 
 # Resolve server binary path (versioned directory)
 TERRARIA_PATH=$(find /root/terraria-server -maxdepth 1 -type d -name '[0-9]*' | head -1)

@@ -24,6 +24,6 @@ services:
       - TERRARIA_USECONFIGFILE=${TERRARIA_USECONFIGFILE}
 
     volumes:
-      - "${TERRARIA_DATA_PATH}:/root/.local/share/Terraria/Worlds"
+      - "${TERRARIA_DATA_PATH}:/root/.local/share/Terraria"
     tty: true
     stdin_open: true
