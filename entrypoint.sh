@@ -58,10 +58,12 @@ fi
 
 server="$TERRARIA_PATH/Linux/TerrariaServer.bin.x86_64 -server"
 
+# Define world_path for monitoring (even if using config file)
+world_path="$WORLDS_DIR/${TERRARIA_WORLDNAME:-Docker}.wld"
+
 if [[ "${TERRARIA_USECONFIGFILE:-No}" == "Yes" ]]; then
   server="$server -config $SERVER_CONFIG"
 else
-  world_path="$WORLDS_DIR/${TERRARIA_WORLDNAME:-Docker}.wld"
   if [[ -e "$world_path" ]]; then
     server="$server -world \"$world_path\""
   else
@@ -96,4 +98,41 @@ if ! pgrep -f "TerrariaServer.bin" >/dev/null 2>&1; then
   echo "[!!] ERROR: Terraria server process exited shortly after start. Check that the image platform matches the binary (use linux/amd64 for x86_64 server on ARM hosts)."
   exit 1
 fi
+
+# Monitor world creation if world doesn't exist
+if [[ "${TERRARIA_USECONFIGFILE:-No}" != "Yes" ]] && [[ ! -e "$world_path" ]]; then
+  echo "[INFO] Monitoring world creation process..."
+  world_name="${TERRARIA_WORLDNAME:-Docker}"
+  max_wait=300  # Wait up to 5 minutes
+  elapsed=0
+  check_interval=5
+  
+  while [[ $elapsed -lt $max_wait ]] && [[ ! -e "$world_path" ]]; do
+    sleep $check_interval
+    elapsed=$((elapsed + check_interval))
+    
+    # Check if world file is being created (partial file exists)
+    if [[ -e "${world_path}.tmp" ]] || [[ -e "${world_path}.tmp.bak" ]]; then
+      echo "[INFO] World creation in progress... (${elapsed}s elapsed)"
+    elif [[ $((elapsed % 30)) -eq 0 ]]; then
+      echo "[INFO] Still waiting for world creation... (${elapsed}s elapsed)"
+    fi
+    
+    # Check if server is still running
+    if ! pgrep -f "TerrariaServer.bin" >/dev/null 2>&1; then
+      echo "[!!] ERROR: Server process exited during world creation!"
+      exit 1
+    fi
+  done
+  
+  if [[ -e "$world_path" ]]; then
+    world_size=$(du -h "$world_path" | cut -f1)
+    echo "[SUCCESS] World \"$world_name\" created successfully! Size: $world_size"
+  else
+    echo "[WARNING] World file not found after ${elapsed}s. It may still be creating in the background."
+    echo "[INFO] World files in directory:"
+    ls -lh "$WORLDS_DIR" 2>/dev/null || echo "  (directory empty or not accessible)"
+  fi
+fi
+
 wait ${!}
