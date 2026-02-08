@@ -45,6 +45,10 @@ mkdir -p "$WORLDS_DIR"
 chmod 755 "$WORLDS_DIR"
 chown -R root:root "$WORLDS_DIR" 2>/dev/null || true
 
+# Log where worlds are stored
+echo "[INFO] World files will be saved to: $WORLDS_DIR"
+echo "[INFO] This maps to host path: ${TERRARIA_DATA_PATH:-<not set>}"
+
 # Resolve server binary path (versioned directory)
 TERRARIA_PATH=$(find /root/terraria-server -maxdepth 1 -type d -name '[0-9]*' | head -1)
 if [[ -z "$TERRARIA_PATH" ]] || [[ ! -x "$TERRARIA_PATH/Linux/TerrariaServer.bin.x86_64" ]]; then
