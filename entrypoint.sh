@@ -68,6 +68,11 @@ else
     server="$server -world \"$world_path\""
   else
     echo "[!!] WARNING: World \"${TERRARIA_WORLDNAME:-Docker}\" not found. Server will create a new world."
+    echo "[INFO] World creation parameters:"
+    echo "  - Path: $world_path"
+    echo "  - Size: ${TERRARIA_WORLDSIZE:-3} (1=Small, 2=Medium, 3=Large)"
+    echo "  - Name: ${TERRARIA_WORLDNAME:-Docker}"
+    echo "  - Seed: ${TERRARIA_WORLDSEED:-Docker}"
     sleep 2
     server="$server -world \"$world_path\" -autocreate ${TERRARIA_WORLDSIZE:-3} -worldname \"${TERRARIA_WORLDNAME:-Docker}\" -seed \"${TERRARIA_WORLDSEED:-Docker}\""
   fi
@@ -103,9 +108,15 @@ fi
 if [[ "${TERRARIA_USECONFIGFILE:-No}" != "Yes" ]] && [[ ! -e "$world_path" ]]; then
   echo "[INFO] Monitoring world creation process..."
   world_name="${TERRARIA_WORLDNAME:-Docker}"
-  max_wait=300  # Wait up to 5 minutes
+  world_size_num="${TERRARIA_WORLDSIZE:-3}"
+  max_wait=600  # Wait up to 10 minutes (large worlds take time)
   elapsed=0
-  check_interval=5
+  check_interval=10
+  
+  # Large worlds (size 3) can take 5-10 minutes to generate
+  if [[ "$world_size_num" == "3" ]]; then
+    echo "[INFO] Large world detected - generation may take 5-10 minutes..."
+  fi
   
   while [[ $elapsed -lt $max_wait ]] && [[ ! -e "$world_path" ]]; do
     sleep $check_interval
@@ -114,8 +125,10 @@ if [[ "${TERRARIA_USECONFIGFILE:-No}" != "Yes" ]] && [[ ! -e "$world_path" ]]; t
     # Check if world file is being created (partial file exists)
     if [[ -e "${world_path}.tmp" ]] || [[ -e "${world_path}.tmp.bak" ]]; then
       echo "[INFO] World creation in progress... (${elapsed}s elapsed)"
-    elif [[ $((elapsed % 30)) -eq 0 ]]; then
-      echo "[INFO] Still waiting for world creation... (${elapsed}s elapsed)"
+    elif [[ $((elapsed % 60)) -eq 0 ]]; then
+      echo "[INFO] Still waiting for world creation... (${elapsed}s / ${max_wait}s elapsed)"
+      echo "[INFO] Checking server status and world directory..."
+      ls -lh "$WORLDS_DIR" 2>/dev/null | head -5 || echo "  (directory empty or not accessible)"
     fi
     
     # Check if server is still running
@@ -123,15 +136,23 @@ if [[ "${TERRARIA_USECONFIGFILE:-No}" != "Yes" ]] && [[ ! -e "$world_path" ]]; t
       echo "[!!] ERROR: Server process exited during world creation!"
       exit 1
     fi
+    
+    # Check for any .wld files that might have been created with different name
+    if ls "$WORLDS_DIR"/*.wld 1>/dev/null 2>&1; then
+      echo "[INFO] Found world files in directory:"
+      ls -lh "$WORLDS_DIR"/*.wld 2>/dev/null
+    fi
   done
   
   if [[ -e "$world_path" ]]; then
     world_size=$(du -h "$world_path" | cut -f1)
     echo "[SUCCESS] World \"$world_name\" created successfully! Size: $world_size"
   else
-    echo "[WARNING] World file not found after ${elapsed}s. It may still be creating in the background."
-    echo "[INFO] World files in directory:"
-    ls -lh "$WORLDS_DIR" 2>/dev/null || echo "  (directory empty or not accessible)"
+    echo "[WARNING] World file not found after ${elapsed}s."
+    echo "[INFO] Listing all files in world directory:"
+    ls -lah "$WORLDS_DIR" 2>/dev/null || echo "  (directory empty or not accessible)"
+    echo "[INFO] Server is still running. World may be creating in background."
+    echo "[INFO] You can check world creation progress by connecting to the server."
   fi
 fi
 
