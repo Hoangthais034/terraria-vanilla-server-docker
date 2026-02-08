@@ -41,6 +41,9 @@ else
 fi
 
 mkdir -p "$WORLDS_DIR"
+# Ensure proper permissions for world directory
+chmod 755 "$WORLDS_DIR"
+chown -R root:root "$WORLDS_DIR" 2>/dev/null || true
 
 # Resolve server binary path (versioned directory)
 TERRARIA_PATH=$(find /root/terraria-server -maxdepth 1 -type d -name '[0-9]*' | head -1)
