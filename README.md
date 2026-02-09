@@ -74,9 +74,44 @@ TERRARIA_DATA_PATH=./terraria-data
 | `TERRARIA_WORLDSEED` | `Docker` | Any string. Seed for new world generation. |
 | `TERRARIA_DIFFICULTY` | `2` | `0` = Normal, `1` = Expert, `2` = Master, `3` = Journey. Used for new worlds; existing world keeps its difficulty. |
 | `TERRARIA_NPCSTREAM` | `1` | `0` = off, `1` = on. Reduces enemy skipping; may use more bandwidth. |
-| `TERRARIA_USECONFIGFILE` | `No` | `Yes` or `No`. If `Yes`, server uses a config file (must be mounted; see Terraria server docs). |
+| `TERRARIA_USECONFIGFILE` | `No` | `Yes` or `No`. If `Yes`, server uses a config file (see "Using serverconfig.txt" below). |
+| `TERRARIA_CONFIG_PATH` | `./serverconfig.txt` | Host path to `serverconfig.txt` when using config file. File is mounted into container. |
 | `TERRARIA_PORT` | `7777` | Host port to publish. Container always listens on 7777. |
 | `TERRARIA_DATA_PATH` | `./terraria-data` | Host path for world data (direct bind mount). Relative or absolute. |
+
+---
+
+## Using serverconfig.txt
+
+Nếu server không áp dụng `difficulty` / `npcstream` qua env (CLI), hoặc bạn muốn cấu hình đầy đủ qua file, dùng **serverconfig.txt** theo [Terraria Wiki – Server config file](https://terraria.wiki.gg/wiki/Server#Server_config_file).
+
+**File name:** `serverconfig.txt` (trên host; tên có thể khác nhưng phải trùng với đường dẫn bạn mount).
+
+**Folder:** Bất kỳ — bạn chỉ cần trỏ `TERRARIA_CONFIG_PATH` trong `.env` tới file đó. Ví dụ đặt trong thư mục project: `./serverconfig.txt`.
+
+**Cách tạo:**
+
+1. Copy file mẫu:
+   ```bash
+   cp serverconfig.example.txt serverconfig.txt
+   ```
+2. Sửa `serverconfig.txt`: đổi `worldname`, `world`, `password`, `motd`, `difficulty`, `npcstream`, `maxplayers`, v.v.  
+   Trong container world nằm tại `/root/.local/share/Terraria/Worlds/`. Ví dụ world tên `Gensokyo`:
+   - `world=/root/.local/share/Terraria/Worlds/Gensokyo.wld`
+   - `worldname=Gensokyo`
+3. Trong `.env` đặt:
+   - `TERRARIA_USECONFIGFILE=Yes`
+   - `TERRARIA_CONFIG_PATH=./serverconfig.txt` (hoặc đường dẫn tuyệt đối tới file của bạn)
+4. **Tạo file trước khi chạy** — nếu `serverconfig.txt` chưa tồn tại, Docker có thể tạo thư mục thay vì mount file. Chạy `docker compose up` sau khi đã có file.
+
+**Format (Terraria Wiki):** Mỗi dòng một option, `key=value`. Dòng bắt đầu bằng `#` là comment. Ví dụ:
+
+- `difficulty=2` — 0=Normal, 1=Expert, 2=Master, 3=Journey  
+- `npcstream=1` hoặc `npcstream=60` — giảm enemy skipping (0=tắt)  
+- `autocreate=3` — 1=Small, 2=Medium, 3=Large  
+- `world=`, `worldpath=`, `worldname=`, `maxplayers=`, `port=`, `password=`, `motd=`, `secure=`, `language=`, v.v.
+
+**Trong container** file được mount tại: `/root/terraria-server/serverconfig.txt`.
 
 ---
 

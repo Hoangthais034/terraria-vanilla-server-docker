@@ -11,6 +11,8 @@ cleanup_pipe() {
 
 shutdown_server() {
   inject "say ${TERRARIA_SHUTDOWN_MESSAGE:-Server is shutting down.}"
+  sleep 2
+  inject "save"
   sleep 3
   inject "exit"
   tmuxPid=$(pgrep tmux 2>/dev/null || true)

@@ -27,5 +27,6 @@ services:
 
     volumes:
       - "${TERRARIA_DATA_PATH}:/root/.local/share/Terraria"
+      - "${TERRARIA_CONFIG_PATH:-./serverconfig.txt}:/root/terraria-server/serverconfig.txt:ro"
     tty: true
     stdin_open: true
