@@ -70,8 +70,10 @@ TERRARIA_DATA_PATH=./terraria-data
 | `TERRARIA_PASS` | `docker` | Any string, or `N/A` to disable password. |
 | `TERRARIA_MAXPLAYERS` | `8` | Integer. Maximum number of players. |
 | `TERRARIA_WORLDNAME` | `Docker` | Any string. World name and base name of the .wld file. |
-| `TERRARIA_WORLDSIZE` | `3` | `1` = Small, `2` = Medium, `3` = Large. Used when creating a new world. |
+| `TERRARIA_WORLDSIZE` | `3` | `1` = Small, `2` = Medium, `3` = Large. **Only used when creating a new world**; existing world is unchanged on restart. |
 | `TERRARIA_WORLDSEED` | `Docker` | Any string. Seed for new world generation. |
+| `TERRARIA_DIFFICULTY` | `2` | `0` = Normal, `1` = Expert, `2` = Master, `3` = Journey. Used for new worlds; existing world keeps its difficulty. |
+| `TERRARIA_NPCSTREAM` | `1` | `0` = off, `1` = on. Reduces enemy skipping; may use more bandwidth. |
 | `TERRARIA_USECONFIGFILE` | `No` | `Yes` or `No`. If `Yes`, server uses a config file (must be mounted; see Terraria server docs). |
 | `TERRARIA_PORT` | `7777` | Host port to publish. Container always listens on 7777. |
 | `TERRARIA_DATA_PATH` | `./terraria-data` | Host path for world data (direct bind mount). Relative or absolute. |
@@ -110,9 +112,20 @@ The container name is `terraria` by default. If you changed it, use that name in
 
 ---
 
+## Restart and changing settings
+
+When you **restart** the container, the **existing world file is loaded as-is**. `TERRARIA_WORLDSIZE` is only used when **creating a new world** (no `.wld` file yet). So you can safely:
+
+- Restart Docker and keep the same world.
+- Change `TERRARIA_MOTD`, `TERRARIA_PASS`, `TERRARIA_MAXPLAYERS`, `TERRARIA_DIFFICULTY`, `TERRARIA_NPCSTREAM`, etc. on restart without affecting the existing world.
+- Leave `TERRARIA_WORLDSIZE=3` even if the world was created as Large; the server only uses it for `-autocreate` when the world does not exist.
+
+---
+
 ## Credits and links
 
 - Terraria: [Official site](https://terraria.org/) | [Steam](https://store.steampowered.com/app/105600/Terraria/)
 - Server config file (when using `TERRARIA_USECONFIGFILE=Yes`): [Terraria Wiki – Server config](https://terraria.fandom.com/wiki/Server#Server_config_file)
+- Env/config reference: [PassiveLemon terraria-docker variables](https://github.com/PassiveLemon/terraria-docker/blob/master/terraria/scripts/variables.sh) (e.g. difficulty, npcstream). If `-difficulty`/`-npcstream` are not applied by your server binary, use `TERRARIA_USECONFIGFILE=Yes` and a `serverconfig.txt` with `difficulty=` and `npcstream=`.
 
 This image is for hosting a Terraria server only. Terraria is the property of its respective owners; this project is not affiliated with and does not infringe on any copyright, trademark, or intellectual property.

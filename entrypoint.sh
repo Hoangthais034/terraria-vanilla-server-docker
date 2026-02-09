@@ -38,6 +38,8 @@ else
   echo "Max Players: ${TERRARIA_MAXPLAYERS:-8}"
   echo "Server Password: ${TERRARIA_PASS:+[set]}"
   echo "MOTD: ${TERRARIA_MOTD:-A Terraria server}"
+  echo "Difficulty: ${TERRARIA_DIFFICULTY:-2} (0=Normal, 1=Expert, 2=Master, 3=Journey)"
+  echo "NPC Stream: ${TERRARIA_NPCSTREAM:-1}"
 fi
 
 # Create Worlds directory (Terraria will also create it, but we ensure it exists)
@@ -88,6 +90,8 @@ else
     echo "[!!] Server password disabled."
   fi
   server="$server -motd \"${TERRARIA_MOTD:-A Terraria server}\""
+  server="$server -difficulty ${TERRARIA_DIFFICULTY:-2}"
+  server="$server -npcstream ${TERRARIA_NPCSTREAM:-1}"
 fi
 
 trap shutdown_server TERM INT
