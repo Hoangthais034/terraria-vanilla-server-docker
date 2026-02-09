@@ -28,7 +28,7 @@ shutdown_server() {
 # Config file: generate from env or use mounted file
 if [[ "${TERRARIA_USECONFIGFILE:-No}" == "Yes" ]]; then
   if [[ "${TERRARIA_GENERATE_FROM_ENV:-Yes}" != "No" ]]; then
-    WORLDS_DIR="$WORLDS_DIR" OUT_FILE="$SERVER_CONFIG" /root/terraria-server/generate-serverconfig.sh
+    OUT_FILE="$SERVER_CONFIG" /root/terraria-server/generate-serverconfig.sh
     echo "Terraria server will launch with config generated from env."
   else
     if [[ ! -e "$SERVER_CONFIG" ]]; then
