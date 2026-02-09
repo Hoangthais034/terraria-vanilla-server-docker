@@ -25,13 +25,18 @@ shutdown_server() {
   cleanup_pipe
 }
 
-# Check config file when enabled
+# Config file: generate from env or use mounted file
 if [[ "${TERRARIA_USECONFIGFILE:-No}" == "Yes" ]]; then
-  if [[ ! -e "$SERVER_CONFIG" ]]; then
-    echo "[!!] ERROR: Config file not found at $SERVER_CONFIG. Map the file and try again."
-    exit 1
+  if [[ "${TERRARIA_GENERATE_FROM_ENV:-Yes}" != "No" ]]; then
+    WORLDS_DIR="$WORLDS_DIR" OUT_FILE="$SERVER_CONFIG" /root/terraria-server/generate-serverconfig.sh
+    echo "Terraria server will launch with config generated from env."
+  else
+    if [[ ! -e "$SERVER_CONFIG" ]]; then
+      echo "[!!] ERROR: Config file not found at $SERVER_CONFIG. Set TERRARIA_CONFIG_PATH and mount the file, or use TERRARIA_GENERATE_FROM_ENV=Yes (default)."
+      exit 1
+    fi
+    echo "Terraria server will launch with the supplied config file."
   fi
-  echo "Terraria server will launch with the supplied config file."
 else
   echo "Shutdown Message: ${TERRARIA_SHUTDOWN_MESSAGE:-Server is shutting down.}"
   echo "Save Interval: ${TERRARIA_AUTOSAVE_INTERVAL:-10} minutes"

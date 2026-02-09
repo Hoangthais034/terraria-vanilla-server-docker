@@ -23,10 +23,9 @@ services:
       - TERRARIA_WORLDSEED=${TERRARIA_WORLDSEED}
       - TERRARIA_DIFFICULTY=${TERRARIA_DIFFICULTY}
       - TERRARIA_NPCSTREAM=${TERRARIA_NPCSTREAM}
-      - TERRARIA_USECONFIGFILE=${TERRARIA_USECONFIGFILE}
+      # TERRARIA_USECONFIGFILE=Yes and TERRARIA_GENERATE_FROM_ENV=Yes are set in Dockerfile; override via .env if needed
 
     volumes:
       - "${TERRARIA_DATA_PATH}:/root/.local/share/Terraria"
-      - "${TERRARIA_CONFIG_PATH:-./serverconfig.txt}:/root/terraria-server/serverconfig.txt:ro"
     tty: true
     stdin_open: true

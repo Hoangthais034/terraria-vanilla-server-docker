@@ -20,10 +20,14 @@ RUN wget -q "https://terraria.org/api/download/pc-dedicated-server/terraria-serv
 
 RUN mkdir -p /root/.local/share/Terraria/Worlds
 
-COPY entrypoint.sh autosave.sh ./
+# Default: use config file generated from env (no need to create serverconfig.txt by hand)
+ENV TERRARIA_USECONFIGFILE=Yes
+ENV TERRARIA_GENERATE_FROM_ENV=Yes
+
+COPY entrypoint.sh autosave.sh generate-serverconfig.sh ./
 COPY inject.sh /usr/local/bin/inject
 
-RUN chmod +x entrypoint.sh /usr/local/bin/inject autosave.sh \
+RUN chmod +x entrypoint.sh autosave.sh generate-serverconfig.sh /usr/local/bin/inject \
     && chmod +x "/root/terraria-server/${TERRARIA_VERSION}/Linux/TerrariaServer.bin.x86_64"
 
 ENTRYPOINT ["./entrypoint.sh"]
